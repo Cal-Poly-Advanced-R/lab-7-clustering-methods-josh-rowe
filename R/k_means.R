@@ -1,146 +1,215 @@
 #' Implements a basic k-means algorithm.
 #'
 #' @param dat A data frame
+#' @param k A number
+#' @param pca A boolean
 #'
-#' @return something (TBD) to be returned with
+#' @return A list with a dataframe containing the original x & y values of the input data and a factor which contains the grouping variable, and the total sum of squares
 #'
-#' @import dplyr
 #' @import tidyverse
 #'
 #' @export
 
-k_means <- function(data, k, pca = FALSE){
-    if (pca = TRUE) {
+k_means <- function(dat, k, pca = FALSE, max_iter = 100){
+
+    max_iter <- as.numeric(max_iter)
+    k <- as.numeric(k)
+
+    if (pca == TRUE) {
         #If pca is set to true, then PCA will be performed on 1st 2 dimensions
-        data_pca <- data %>%
+        data_pca <- dat %>%
             princomp()
 
-        data_pca_scores <- data_pca$scores %>%
+        dat <- data_pca$scores %>%
             as_tibble() %>%
             select(Comp.1, Comp.2)
     }
 
     set.seed(37)
 
+    x <- as.data.frame(dat[, 1])
+    y <- as.data.frame(dat[, 2])
 
+    colnames(x) = "x"
+    colnames(y) = "y"
+
+    start_points <- dat[sample(nrow(dat), k), ]
+
+    start_x <- as.data.frame(start_points[, 1])
+    start_y <- as.data.frame(start_points[, 2])
+
+    distances <- get_distances(x, y, start_x, start_y)
+
+    groups <- as.data.frame(
+        names(distances)[apply(distances, MARGIN = 1, FUN = which.min)])
+
+    colnames(groups) <- "Group"
+
+    distances <- distances |>
+        mutate(Group = as.factor(groups$Group),
+               x = x$x,
+               y = y$y)
+
+    group_names <- levels(distances$Group)
+
+    for (i in group_names) {
+
+        start_x_i <- distances |>
+            filter(Group == i) |>
+            select(x) |>
+            colMeans() |>
+            as.numeric()
+
+        start_y_i <- distances |>
+            filter(Group == i) |>
+            select(y) |>
+            colMeans() |>
+            as.numeric()
+
+        if (i == "Group1") {
+
+            start_x <- start_x_i
+            start_y <- start_y_i
+
+        } else {
+
+            start_x <- rbind(start_x, start_x_i)
+            start_y <- rbind(start_y, start_y_i)
+
+        }
+
+    }
+
+    start_x <- as.data.frame(start_x)
+    start_y <- as.data.frame(start_y)
+
+    j <- 2
+
+    while (j <= max_iter) {
+
+        prev_sx <- start_x
+        prev_sy <- start_y
+
+        distances <- get_distances(x, y, start_x, start_y)
+
+        groups <- as.data.frame(
+            names(distances)[apply(distances, MARGIN = 1, FUN = which.min)])
+
+        colnames(groups) <- "Group"
+
+        distances <- distances |>
+            mutate(Group = as.factor(groups$Group),
+                   x = x$x,
+                   y = y$y)
+
+        for (i in group_names) {
+
+            start_x_i <- distances |>
+                filter(Group == i) |>
+                select(x) |>
+                colMeans() |>
+                as.numeric()
+
+            start_y_i <- distances |>
+                filter(Group == i) |>
+                select(y) |>
+                colMeans() |>
+                as.numeric()
+
+            if (i == "Group1") {
+
+                start_x <- start_x_i
+                start_y <- start_y_i
+
+            } else {
+
+                start_x <- rbind(start_x, start_x_i)
+                start_y <- rbind(start_y, start_y_i)
+
+            }
+
+        }
+
+        if (identical(prev_sx, start_x) && identical(prev_sy, start_y)) {
+
+            break
+
+        }
+
+        j <- j + 1
+
+    }
+
+    result_groups <- distances |>
+        select(x, y, Group)
+
+    dmin <- distances |>
+        select(-Group, -x, -y)
+
+    dmin <- apply(dmin, 1, min)
+
+    result_tss <- sum(dmin^2)
+
+    result <- list(groups = result_groups, tss = result_tss)
+
+    return(result)
 
 
 }
 
----
-    title: "Check in Week 7"
-author: "Roee Morag"
-date: "2023-05-23"
-output: html_document
----
 
-    ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-```
+#' Implements a basic k-means algorithm.
+#'
+#' @param dat A data frame
+#' @param start_points A data frame
+#'
+#' @return A data frame containing the distances of each point in dat to the initial points
+#'
+#' @import tidyverse
+#'
+#' @export
+#'
 
-```{r}
-library(tidyverse)
-library(dplyr)
-library(ggdendro)
-library("ape")
-```
+get_distances <- function(x, y, start_x, start_y) {
 
+    for (i in 1:nrow(start_x)) {
 
-```{r}
-fed <- read_csv(here::here("federalist.txt"))
+        sx <- as.numeric(start_x[i, 1])
+        sy <- as.numeric(start_y[i, 1])
 
-head(fed)
+        dist_i <- sqrt((x - sx)^2 + (y - sy)^2)
 
-fed <- select(fed, -`...1`)
-```
+        if (i == 1) {
 
-```{r}
-fed_pca <-
-    fed %>%
-    select(-Author) %>%
-    princomp()
+            dist <- dist_i
 
-tibble(
-    pcs = 1:70,
-    variance = fed_pca$sdev^2
-) %>%
-    ggplot(aes(x = pcs, y = variance)) +
-    geom_col()
+        } else {
 
-fed_pc_scores <-
-    fed_pca$scores %>%
-    as_tibble() %>%
-    select(Comp.1, Comp.2) %>%
-    mutate(
-        Author = fed$Author
-    )
+            dist <- cbind(dist, dist_i)
+        }
 
+    }
 
+    for (i in 1:nrow(start_x)) {
 
-```
+        col_name <- glue::glue("Group", i)
 
-```{r}
+        if (i == 1) {
 
-my_kmeans <-
-    fed_pc_scores %>%
-    select(Comp.1, Comp.2) %>%
-    kmeans(centers = 3)
-```
+            col_names <- col_name
 
-```{r}
+        } else {
 
-fed_pc_scores <- fed_pc_scores %>%
-    mutate(Cluster = my_kmeans$cluster)
+            col_names <- cbind(col_names, col_name)
+        }
 
-ggplot(fed_pc_scores, aes(x = Comp.1, y = Comp.2, color = Author, label = factor(Cluster))) +
-    geom_point() +
-    geom_text(hjust = 0, vjust = 0) +
-    labs(color = "Author") +
-    theme_minimal()
+    }
+
+    colnames(dist) <- col_names
 
 
-```
+    return(dist)
+
+}
 
 
-```{r}
-my_kmeans_iris <-
-    iris %>%
-    select(Petal.Length, Petal.Width) %>%
-    kmeans(centers = 3)
-
-test_k <-
-    tibble(
-        `Number of Clusters` = 2:6,
-        SS = map_dbl(2:6, ~kmeans(iris[, 3:4], centers = .x)$tot.withinss)
-    )
-
-test_k %>%
-    ggplot() +
-    aes(x = `Number of Clusters`, y = SS) +
-    geom_point() +
-    geom_line() +
-    ylab("")
-
-
-
-```
-
-
-```{r}
-
-fed_matrix <- as.matrix(fed)
-
-fed_dist <- dist(fed_matrix)
-
-h_clust <- hclust(fed_dist)
-
-
-
-op = par(bg = "#DDE3CA")
-plot(h_clust, labels = fed$Author, cex = 0.5, las = 1, xlab = "")
-axis(side = 2, at = seq(0, 400, 100), col = "#F38630",
-     labels = FALSE, lwd = 2)
-
-
-
-```
