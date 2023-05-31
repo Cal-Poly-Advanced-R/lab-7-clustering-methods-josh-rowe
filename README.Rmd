@@ -18,15 +18,45 @@ knitr::opts_chunk$set(
 <!-- badges: start -->
 <!-- badges: end -->
 
-The goal of clust431 is to ...
+The goal of clust431 is to provide two main functions:
+    k_means(), which performs clustering on a given dataset using a basic
+        k means algorithm
+    hclust(), which ...
 
 ## Installation
 
-You can install the released version of clust431 from [CRAN](https://CRAN.R-project.org) with:
+You can install the released version of clust431 from GitHub with:
 
 ``` r
-install.packages("clust431")
+
+install_github("josh-rowe/lab-7-clustering-methods-josh-rowe")
+
 ```
+
+## Functions
+
+### k_means()
+
+#### Inputs
+
+*dat* a dataframe where the first two columns are x and y coordinates
+
+*k* a number describing the number of clusters to search for
+
+*pca* a boolean which allows the user to have k_means() perform pca on the data
+    before running the k means algorithm (defaults to FALSE)
+    
+*max_iter* a number describing the maximum number of iterations for k_means() to
+    run through if convergence is not met (defaults to 100)
+    
+#### Outputs
+
+A list with two elements:
+
+*groups* a dataframe with the x and y values of the original data and a factor 
+    which contains the grouping assignment of each observation
+
+*tss* the total sum of squares of the final grouping assignment
 
 ## Example
 
@@ -34,7 +64,13 @@ This is a basic example which shows you how to solve a common problem:
 
 ```{r example}
 library(clust431)
-## basic example code
+
+dat <- data.frame(x = c(1, 2, 3, 10, 11, 12, 20, 21, 22),
+                  y = c(1, 2, 3, 10, 11, 12, 20, 21, 22))
+
+dat_groups <- k_means(dat = dat, k = 3)
+
+
 ```
 
 What is special about using `README.Rmd` instead of just `README.md`? You can include R chunks like so:
