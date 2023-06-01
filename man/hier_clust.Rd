@@ -4,7 +4,7 @@
 \alias{hier_clust}
 \title{Function that provides agglomerative hierachcal slusters for a data set}
 \usage{
-hier_clust(data)
+hier_clust(data, cluster)
 }
 \arguments{
 \item{data}{data set}
