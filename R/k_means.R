@@ -10,7 +10,7 @@
 #'
 #' @export
 
-k_means <- function(dat, k, pca = FALSE, max_iter = 100){
+k_means <- function(dat, k, pca = FALSE, max_iter = 1000){
 
     max_iter <- as.numeric(max_iter)
     k <- as.numeric(k)
@@ -137,6 +137,12 @@ k_means <- function(dat, k, pca = FALSE, max_iter = 100){
         }
 
         j <- j + 1
+
+    }
+
+    if (j == max_iter) {
+
+        return(glue::glue(max_iter, " iterations reached without convergence"))
 
     }
 
