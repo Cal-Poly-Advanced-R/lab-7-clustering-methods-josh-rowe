@@ -6,7 +6,7 @@
 #'
 #' @return A list with a dataframe containing the original x & y values of the input data and a factor which contains the grouping variable, and the total sum of squares
 #'
-#' @import tidyverse
+#' @import dplyr
 #'
 #' @export
 
