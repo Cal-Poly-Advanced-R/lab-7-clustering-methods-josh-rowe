@@ -6,7 +6,7 @@
 #'
 #' @export
 
-hier_clust <- function(data){
+hier_clust <- function(data, cluster){
     dist <- dist(data)
     dist <- as.matrix(dist)
     dist <- as.data.frame(apply(dist, 1, function(x) ifelse(x == 0, NA, x)))
@@ -29,6 +29,18 @@ hier_clust <- function(data){
             dist <- dist[-which(rownames(dist) == cur),]
         }
     }
-    return(data.frame(index = rep(1:nrow(data)),
-                      clusters = vec))
+    i = 1
+    while(nrow(dist) > cluster){
+        j = unique(vec)[i]
+        cur = as.numeric(rownames(dist)[which.min(dist[,j])])
+        vec[vec == cur] <- j
+        dist <- dist[-cur,]
+        i <- i + 1
+        if(i > length(unique(vec))){
+            i = 1
+        }
+
+    }
+    return(list(dist = dist, df = data.frame(index = rep(1:nrow(data)),
+                      clusters = vec)))
 }
