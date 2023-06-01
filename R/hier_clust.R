@@ -1,6 +1,7 @@
-#' Function that provides agglomerative hierachcal slusters for a data set
+#' Function that provides agglomerative hierarchical clusters for a data set
 #'
 #' @param data data set
+#' @param cluster user-specified number of clusters
 #'
 #' @returns a data frame specifying the cluster assignment and index of each observation in the data set
 #'

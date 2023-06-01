@@ -2,16 +2,18 @@
 % Please edit documentation in R/hier_clust.R
 \name{hier_clust}
 \alias{hier_clust}
-\title{Function that provides agglomerative hierachcal slusters for a data set}
+\title{Function that provides agglomerative hierarchical clusters for a data set}
 \usage{
 hier_clust(data, cluster)
 }
 \arguments{
 \item{data}{data set}
+
+\item{cluster}{user-specified number of clusters}
 }
 \value{
 a data frame specifying the cluster assignment and index of each observation in the data set
 }
 \description{
-Function that provides agglomerative hierachcal slusters for a data set
+Function that provides agglomerative hierarchical clusters for a data set
 }
