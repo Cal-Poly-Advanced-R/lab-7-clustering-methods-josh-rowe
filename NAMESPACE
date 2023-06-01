@@ -2,6 +2,7 @@
 
 export("%>%")
 export(get_distances)
+export(hier_clust)
 export(k_means)
 import(tidyverse)
 importFrom(magrittr,"%>%")
