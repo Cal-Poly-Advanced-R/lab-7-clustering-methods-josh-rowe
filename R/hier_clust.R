@@ -1,6 +1,7 @@
-#' Function that provides agglomerative hierachcal slusters for a data set
+#' Function that provides agglomerative hierarchical clusters for a data set
 #'
 #' @param data data set
+#' @param cluster user-specified number of clusters
 #'
 #' @returns a data frame specifying the cluster assignment and index of each observation in the data set
 #'
@@ -34,13 +35,15 @@ hier_clust <- function(data, cluster){
         j = unique(vec)[i]
         cur = as.numeric(rownames(dist)[which.min(dist[,j])])
         vec[vec == cur] <- j
-        dist <- dist[-cur,]
+        dist <- dist[-which(as.numeric(rownames(dist)) == cur),]
         i <- i + 1
         if(i > length(unique(vec))){
             i = 1
         }
 
+
     }
-    return(list(dist = dist, df = data.frame(index = rep(1:nrow(data)),
-                      clusters = vec)))
+    vec <- factor(vec, labels = c(1:length(unique(vec))))
+    return(data.frame(index = rep(1:nrow(data)),
+                      clusters = vec))
 }
