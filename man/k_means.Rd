@@ -4,7 +4,7 @@
 \alias{k_means}
 \title{Implements a basic k-means algorithm.}
 \usage{
-k_means(dat, k, pca = FALSE, max_iter = 100)
+k_means(dat, k, pca = FALSE, max_iter = 1000)
 }
 \arguments{
 \item{dat}{A data frame}
