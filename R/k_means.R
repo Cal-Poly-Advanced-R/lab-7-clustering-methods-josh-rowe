@@ -7,6 +7,7 @@
 #' @return A list with a dataframe containing the original x & y values of the input data and a factor which contains the grouping variable, and the total sum of squares
 #'
 #' @import dplyr
+#' @import tidyverse
 #'
 #' @export
 
@@ -215,6 +216,41 @@ get_distances <- function(x, y, start_x, start_y) {
 
 
     return(dist)
+
+}
+
+
+#' Implements a basic k-means algorithm and plots the results
+#'
+#' @param dat A data frame
+#' @param k A number
+#'
+#' @return a data visualization of the k means clustering in the first 2 PC dimensions
+#'
+#' @import dplyr
+#' @import tidyverse
+#' @import ggplot2
+#'
+#' @export
+
+kmeans_viz <- function(dat, k){
+
+    #PCA is automatically assumed to be true by nature of the function
+    k_results <- k_means(dat, k, pca = TRUE)
+
+    #Saves th
+    data_pca <- dat %>%
+        princomp()
+
+    data_pc_scores <- data_pca$scores %>%
+        as_tibble() %>%
+        select(Comp.1, Comp.2) %>%
+        mutate(
+            Group = k_results$Group
+        )
+
+
+
 
 }
 
