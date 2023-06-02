@@ -174,7 +174,6 @@ k_means <- function(dat, k, pca = FALSE, max_iter = 1000){
 #'
 #' @import tidyverse
 #'
-#' @export
 #'
 
 get_distances <- function(x, y, start_x, start_y) {
@@ -245,13 +244,12 @@ kmeans_viz <- function(dat, k){
     data_pc_scores <- data_pca$scores %>%
         as_tibble() %>%
         select(Comp.1, Comp.2) %>%
-        mutate(
-            Group = k_results$Group
-        )
+        mutate(Group = k_results[[1]]$Group)
 
-
-
+    ggplot(data_pc_scores, aes(x = Comp.1, y = Comp.2, color = Group)) +
+        geom_point() +
+        stat_ellipse() +
+        theme_minimal()
 
 }
-
 

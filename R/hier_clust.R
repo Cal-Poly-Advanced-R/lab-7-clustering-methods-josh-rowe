@@ -60,5 +60,18 @@ hier_clust <- function(data, cluster, dist_method = "euclidean"){
 #' @returns a data frame specifying the cluster assignment and index of each observation in the data set
 #'
 #' @import ggplot2
+#' @import ape
 #'
 #' @export
+
+hier_clust_dendro <-function(data, cluster, dist_method = "euclidean"){
+
+    x <- hier_clust(data, cluster, dist_method)
+
+    hc <- hclust(dist(x))
+
+    op = par(bg="#E8DDCB")
+    plot(as.phylo(hc), type = "fan", label.offset = 1)
+    title(main = "Clustered Results as a Dendrogram")
+
+}
